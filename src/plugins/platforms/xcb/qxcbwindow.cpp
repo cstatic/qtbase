@@ -1540,6 +1540,10 @@ void QXcbWindow::handleClientMessageEvent(const xcb_client_message_event_t *even
                || event->type == atom(QXcbAtom::WM_CHANGE_STATE)) {
         // Ignore _NET_ACTIVE_WINDOW, _NET_WM_STATE, MANAGER which are relate to tray icons
         // and other messages.
+#ifdef Q_OS_TIZEN
+    } else if (event->type == atom(QXcbAtom::_X_ILLUME_DEACTIVATE_WINDOW)) {
+        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationHidden);
+#endif // Q_OS_TIZEN
     } else {
         qWarning() << "QXcbWindow: Unhandled client message:" << connection()->atomName(event->type);
     }

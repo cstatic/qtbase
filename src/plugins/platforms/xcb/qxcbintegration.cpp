@@ -91,6 +91,10 @@
 #endif
 #endif
 
+#ifdef Q_OS_TIZEN
+#include <aul/aul.h>
+#endif // Q_OS_TIZEN
+
 #include <QtCore/QFileInfo>
 
 QT_BEGIN_NAMESPACE
@@ -119,12 +123,45 @@ static bool runningUnderDebugger()
 }
 #endif
 
+#ifdef Q_OS_TIZEN
+static int aul_handler(aul_type type, bundle *, void *)
+{
+    switch (type) {
+    case AUL_START:
+        QWindowSystemInterface::handleApplicationStateChanged(Qt::ApplicationActive);
+        break;
+    case AUL_RESUME:
+        if (!QGuiApplication::topLevelWindows().isEmpty())
+            QGuiApplication::topLevelWindows().first()->requestActivate();
+        break;
+    case AUL_TERMINATE:
+        QCoreApplication::quit();
+        break;
+    }
+    return 0;
+}
+#endif // Q_OS_TIZEN
+
 QXcbIntegration::QXcbIntegration(const QStringList &parameters, int &argc, char **argv)
     : m_eventDispatcher(createUnixEventDispatcher())
     ,  m_services(new QGenericUnixServices)
     , m_instanceName(0)
 {
     QGuiApplicationPrivate::instance()->setEventDispatcher(m_eventDispatcher);
+#ifdef Q_OS_TIZEN
+    aul_launch_init(aul_handler, 0);
+    const int argumentsCount = QCoreApplication::arguments().count();
+    char *tmpArgs[argumentsCount];
+    int i = 0;
+
+    foreach (const QString &arg, QCoreApplication::arguments())
+        tmpArgs[i++] = strdup(arg.toLocal8Bit().constData());
+
+    aul_launch_argv_handler(argumentsCount, tmpArgs);
+
+    for ( i = 0; i < argumentsCount; i++)
+        free(tmpArgs[i]);
+#endif // Q_OS_TIZEN
 
 #ifdef XCB_USE_XLIB
     XInitThreads();
