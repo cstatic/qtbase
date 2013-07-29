@@ -103,6 +103,10 @@
 
 #include <ctype.h>
 
+#if defined(Q_OS_ANDROID) || defined(Q_OS_TIZEN)
+#  define ANDROID_TIZEN_HW_BUTTONS
+#endif
+
 QT_BEGIN_NAMESPACE
 
 Q_GUI_EXPORT bool qt_is_gui_used = true;
@@ -1654,16 +1658,16 @@ void QGuiApplicationPrivate::processKeyEvent(QWindowSystemInterfacePrivate::KeyE
     QWindow *window = e->window.data();
     modifier_buttons = e->modifiers;
     if (e->nullWindow
-#ifdef Q_OS_ANDROID
+#ifdef ANDROID_TIZEN_HW_BUTTONS
            || (e->keyType == QEvent::KeyRelease && e->key == Qt::Key_Back) || e->key == Qt::Key_Menu
-#endif
+#endif //ANDROID_TIZEN_HW_BUTTONS
             ) {
         window = QGuiApplication::focusWindow();
     }
     if (!window
-#ifdef Q_OS_ANDROID
+#ifdef ANDROID_TIZEN_HW_BUTTONS
            && e->keyType != QEvent::KeyRelease && e->key != Qt::Key_Back
-#endif
+#endif //ANDROID_TIZEN_HW_BUTTONS
             ) {
         return;
     }
@@ -1677,7 +1681,7 @@ void QGuiApplicationPrivate::processKeyEvent(QWindowSystemInterfacePrivate::KeyE
                  e->unicode, e->repeat, e->repeatCount);
     ev.setTimestamp(e->timestamp);
 
-#ifdef Q_OS_ANDROID
+#ifdef ANDROID_TIZEN_HW_BUTTONS
     if (e->keyType == QEvent::KeyRelease && e->key == Qt::Key_Back) {
         if (!window) {
             qApp->quit();
@@ -1687,7 +1691,7 @@ void QGuiApplicationPrivate::processKeyEvent(QWindowSystemInterfacePrivate::KeyE
                 QWindowSystemInterface::handleCloseEvent(window);
         }
     } else
-#endif
+#endif //ANDROID_TIZEN_HW_BUTTONS
         QGuiApplication::sendSpontaneousEvent(window, &ev);
 }
 
