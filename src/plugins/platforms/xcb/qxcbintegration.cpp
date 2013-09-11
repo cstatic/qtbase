@@ -322,6 +322,9 @@ bool QXcbIntegration::hasCapability(QPlatformIntegration::Capability cap) const
     case WindowMasks: return true;
     case MultipleWindows: return true;
     case ForeignWindows: return true;
+#ifdef Q_OS_TIZEN
+    case ApplicationState: return true;
+#endif
     default: return QPlatformIntegration::hasCapability(cap);
     }
 }
