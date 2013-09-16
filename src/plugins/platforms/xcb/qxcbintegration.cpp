@@ -150,17 +150,7 @@ QXcbIntegration::QXcbIntegration(const QStringList &parameters, int &argc, char 
     QGuiApplicationPrivate::instance()->setEventDispatcher(m_eventDispatcher);
 #ifdef Q_OS_TIZEN
     aul_launch_init(aul_handler, 0);
-    const int argumentsCount = QCoreApplication::arguments().count();
-    char *tmpArgs[argumentsCount];
-    int i = 0;
-
-    foreach (const QString &arg, QCoreApplication::arguments())
-        tmpArgs[i++] = strdup(arg.toLocal8Bit().constData());
-
-    aul_launch_argv_handler(argumentsCount, tmpArgs);
-
-    for ( i = 0; i < argumentsCount; i++)
-        free(tmpArgs[i]);
+    aul_launch_argv_handler(argc, argv);
 #endif // Q_OS_TIZEN
 
 #ifdef XCB_USE_XLIB
